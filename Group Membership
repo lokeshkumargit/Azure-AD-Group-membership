@@ -1,0 +1,26 @@
+
+$allgroups = Get-AzureADGroup -Filter "startswith(displayName,'Azure-PIM-')" | select ObjectId,DisplayName
+
+$result = foreach ( $group in $allgroups ) {
+
+    $hash = @{GroupName=$group.DisplayName;Member=''}
+    $groupid = $group.ObjectId
+    
+    if ( $members = Get-AzureADGroupMember -ObjectId $groupid ) {
+            
+            foreach ( $member in $members ) {
+
+                $hash.Member = $member.DisplayName
+                $hash.Member = $member.UserPrincipalName
+                New-Object psObject -Property $hash
+            }
+            }
+    else
+        {
+        $displayname = "No Members"
+        $hash.Member = $displayname
+        New-Object psObject -Property $hash
+        }
+}
+
+$result | Export-Csv -Path 'C:\Users\klokesh5\Desktop\2022\China Tenant Details\PIM\AzureADGroups.csv' -NoTypeInformation
